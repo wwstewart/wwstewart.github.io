@@ -1,0 +1,919 @@
+/*
+  The case file layer. Exhibit labels, the seal, the exhibit
+  index rail and exhibit rows, evidence drawers, chain of custody lines, marginalia, and the
+  trust and plain pages. Tokens come from styles.css; this file adds one monospace face for
+  exhibit numbers, hashes and log lines, served from this site like Work Sans.
+*/
+
+@font-face {
+  font-family: "Plex Mono";
+  src: url("fonts/PlexMono.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+    U+FEFF, U+FFFD;
+}
+
+:root {
+  --mono: "Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --t-mono: 0.875rem;
+}
+
+.mono {
+  font-family: var(--mono);
+  font-size: var(--t-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Exhibit label: a short gold rule, then the file number in monospace capitals. */
+.exhibit-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-3);
+  color: var(--gold-text);
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  letter-spacing: 0.14em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.exhibit-label::before {
+  content: "";
+  width: 24px;
+  height: 1px;
+  background: var(--gold);
+}
+
+/* Cover: the text column beside the seal. */
+.cover__grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--s-5);
+  row-gap: var(--s-7);
+  align-items: start;
+}
+
+.cover__text {
+  grid-column: 1 / span 7;
+  display: grid;
+  align-content: start;
+  gap: var(--s-5);
+}
+
+.cover__text h1 {
+  max-width: 13em;
+}
+
+.cover__text .btn-row {
+  margin-top: var(--s-2);
+}
+
+.cover__seal {
+  grid-column: 9 / -1;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: var(--s-4);
+  text-align: center;
+}
+
+.cover__seal .link {
+  justify-self: center;
+}
+
+@media (max-width: 1023px) {
+  .cover__text {
+    grid-column: 1 / span 8;
+  }
+
+  .cover__seal {
+    grid-column: 1 / -1;
+    justify-items: start;
+    text-align: left;
+  }
+
+  .cover__seal .link {
+    justify-self: start;
+  }
+}
+
+@media (max-width: 639px) {
+  .cover__grid {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--s-6);
+  }
+
+  .cover__text,
+  .cover__seal {
+    grid-column: 1 / -1;
+  }
+
+  .cover__text .btn-row .btn {
+    flex: 1 1 100%;
+  }
+}
+
+/* The seal: gold strokes, a burgundy mark. With scripts on, casefile.js draws each part once. */
+.seal {
+  width: min(100%, 260px);
+  color: var(--gold);
+}
+
+.seal svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.seal circle,
+.seal path {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.seal .seal__mark {
+  stroke: var(--accent);
+}
+
+.seal .seal__dot {
+  fill: var(--accent);
+  stroke: none;
+}
+
+.seal__caption {
+  max-width: 22rem;
+  color: var(--muted);
+  font-size: var(--t-small);
+  line-height: 1.5;
+}
+
+/* Availability facts under the cover. */
+.cover-facts {
+  padding-block: 0 var(--s-7);
+}
+
+.cover-facts .facts {
+  margin-top: 0;
+}
+
+/* The live check beside its explanation. */
+.cover-check {
+  padding-block: var(--s-6) var(--padb);
+}
+
+.cover-check .wrap {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--s-5);
+  row-gap: var(--s-6);
+  align-items: start;
+}
+
+.cover-check__card {
+  grid-column: 1 / span 7;
+  min-width: 0;
+}
+
+.cover-check__aside {
+  grid-column: 9 / -1;
+  display: grid;
+  align-content: start;
+  gap: var(--s-4);
+}
+
+.cover-check__aside .link {
+  justify-self: start;
+}
+
+@media (max-width: 1023px) {
+  .cover-check__card {
+    grid-column: 1 / -1;
+    max-width: 40rem;
+  }
+
+  .cover-check__aside {
+    grid-column: 1 / -1;
+    max-width: 40rem;
+  }
+}
+
+/* Exhibits: the index rail stays in view while the rows scroll. */
+.exhibits__grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--s-5);
+  row-gap: var(--s-6);
+  align-items: start;
+}
+
+.index {
+  grid-column: 1 / span 3;
+  position: sticky;
+  top: var(--s-5);
+  display: grid;
+  align-content: start;
+}
+
+.index__title {
+  margin-bottom: var(--s-3);
+}
+
+.index__link {
+  display: flex;
+  gap: var(--s-3);
+  min-height: 44px;
+  padding-block: var(--s-2);
+  align-items: center;
+  border-top: 1px solid var(--line);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: var(--t-mono);
+  text-decoration: none;
+  transition: color var(--m-out) var(--ease), var(--focus-t);
+}
+
+.index__link:last-of-type {
+  border-bottom: 1px solid var(--line);
+}
+
+.index__num {
+  flex: 0 0 2.25rem;
+  color: var(--gold-text);
+}
+
+.index__note {
+  margin-top: var(--s-4);
+  color: var(--muted);
+  font-size: var(--t-small);
+  line-height: 1.5;
+}
+
+.exhibit-list {
+  grid-column: 5 / -1;
+  min-width: 0;
+}
+
+.exhibit-list .section__head {
+  margin-bottom: var(--s-6);
+}
+
+.exhibit {
+  display: grid;
+  grid-template-columns: 4rem minmax(0, 1fr) auto;
+  column-gap: var(--s-5);
+  row-gap: var(--s-3);
+  align-items: start;
+  padding-block: var(--s-5);
+  border-top: 1px solid var(--line);
+}
+
+.exhibit:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+.exhibit__num {
+  padding-top: 3px;
+  color: var(--gold-text);
+  font-family: var(--mono);
+  font-size: 1.375rem;
+  line-height: 1.1;
+}
+
+.exhibit__body {
+  display: grid;
+  gap: var(--s-2);
+  min-width: 0;
+}
+
+.exhibit__body h3 {
+  font-size: var(--t-h3);
+}
+
+.exhibit__text {
+  max-width: 62ch;
+}
+
+.exhibit__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2) var(--s-5);
+  margin-top: var(--s-1);
+}
+
+/* Evidence pill: a link when the exhibit has something to open, plain text when it has none. */
+.evidence-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: 36px;
+  padding: 0 var(--s-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  line-height: 1.3;
+  text-decoration: none;
+  white-space: nowrap;
+  justify-self: end;
+  transition: background-color var(--m-out) var(--ease), border-color var(--m-out) var(--ease),
+    color var(--m-out) var(--ease), var(--focus-t);
+}
+
+a.evidence-pill {
+  border-color: var(--wire);
+  color: var(--ink);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  a.evidence-pill:hover,
+  .evidence > summary:hover {
+    background: var(--accent-soft);
+    border-color: var(--ink);
+    transition-duration: var(--m-in);
+  }
+
+  .index__link:hover {
+    color: var(--accent);
+    transition-duration: var(--m-in);
+  }
+}
+
+@media (max-width: 1023px) {
+  .index {
+    grid-column: 1 / -1;
+    position: static;
+    grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+    column-gap: var(--s-5);
+  }
+
+  .index__title,
+  .index__note {
+    grid-column: 1 / -1;
+  }
+
+  .index__link:last-of-type {
+    border-bottom: 0;
+  }
+
+  .exhibit-list {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 639px) {
+  .exhibit {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .exhibit__num {
+    padding-top: 0;
+  }
+
+  .evidence-pill {
+    justify-self: start;
+  }
+}
+
+/* Exhibit pages: breadcrumb, chain of custody, a rail beside the content. */
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2) var(--s-3);
+  font-family: var(--mono);
+  font-size: var(--t-mono);
+}
+
+.crumbs__sep {
+  color: var(--wire);
+}
+
+.crumbs__here {
+  color: var(--gold-text);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.8125rem;
+}
+
+.custody {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2) var(--s-5);
+  margin-top: var(--s-5);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.exhibit-page__grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--s-5);
+  row-gap: var(--s-6);
+  align-items: start;
+}
+
+.rail {
+  grid-column: 1 / span 3;
+  position: sticky;
+  top: var(--s-5);
+  display: grid;
+  align-content: start;
+  gap: 0;
+}
+
+.rail__title {
+  margin-bottom: var(--s-2);
+}
+
+.rail__link {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  border-top: 1px solid var(--line);
+  color: var(--ink);
+  font-size: var(--t-small);
+  text-decoration: none;
+  transition: color var(--m-out) var(--ease), var(--focus-t);
+}
+
+.rail__link:last-of-type {
+  border-bottom: 1px solid var(--line);
+}
+
+.marginalia {
+  margin-top: var(--s-5);
+  padding: var(--s-3) var(--s-4);
+  border: 1px dashed var(--wire);
+  border-radius: var(--r-sm);
+  color: var(--muted);
+  font-size: var(--t-small);
+  line-height: 1.5;
+}
+
+.marginalia .label {
+  margin-bottom: var(--s-1);
+  color: var(--gold-text);
+}
+
+.exhibit-main {
+  grid-column: 5 / -1;
+  min-width: 0;
+}
+
+/* Inside the exhibit column the work rows stack: heading, tools, text, then the drawer. */
+.exhibit-main .work-rows > li {
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: var(--s-3);
+}
+
+.exhibit-main .work-rows h3,
+.exhibit-main .work-rows p {
+  grid-column: 1;
+}
+
+.exhibit-main .work-rows h3 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2) var(--s-3);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 var(--s-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--muted);
+  font-family: var(--font);
+  font-size: 0.8125rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.3;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .rail__link:hover {
+    color: var(--accent);
+    transition-duration: var(--m-in);
+  }
+}
+
+@media (max-width: 1023px) {
+  .rail {
+    grid-column: 1 / -1;
+    position: static;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    column-gap: var(--s-5);
+  }
+
+  .rail__title,
+  .marginalia {
+    grid-column: 1 / -1;
+  }
+
+  .rail__link:last-of-type {
+    border-bottom: 0;
+  }
+
+  .exhibit-main {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Evidence drawer: a native details element, so it opens with scripts off. */
+.evidence {
+  grid-column: 1;
+  margin-top: var(--s-1);
+}
+
+.evidence > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: 36px;
+  padding: 0 var(--s-3);
+  border: 1px solid var(--wire);
+  border-radius: var(--r-sm);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  line-height: 1.3;
+  list-style: none;
+  cursor: pointer;
+  outline: 2px solid transparent;
+  outline-offset: 6px;
+  transition: background-color var(--m-out) var(--ease), border-color var(--m-out) var(--ease),
+    var(--focus-t);
+}
+
+.evidence > summary::-webkit-details-marker {
+  display: none;
+}
+
+.evidence > summary:focus-visible {
+  outline-color: var(--focus);
+  outline-offset: 2px;
+}
+
+.evidence__chev {
+  transition: transform var(--m-out) var(--ease);
+}
+
+.evidence[open] .evidence__chev {
+  transform: rotate(180deg);
+}
+
+.evidence__body {
+  display: grid;
+  grid-template-columns: 9rem minmax(0, 1fr);
+  gap: var(--s-2) var(--s-4);
+  margin-top: var(--s-3);
+  padding: var(--s-4) var(--s-5);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+}
+
+.evidence__title {
+  grid-column: 1 / -1;
+  margin-bottom: var(--s-1);
+}
+
+.evidence__body dt {
+  color: var(--muted);
+  font-size: var(--t-small);
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.evidence__body dd {
+  line-height: 1.5;
+}
+
+@media (max-width: 559px) {
+  .evidence__body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Trust page */
+.trust-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-7) var(--s-6);
+  align-items: start;
+}
+
+.trust-item {
+  display: grid;
+  align-content: start;
+  gap: var(--s-3);
+  min-width: 0;
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--line);
+}
+
+.trust-item--wide {
+  grid-column: 1 / -1;
+}
+
+.trust-item h2 {
+  font-size: var(--t-h3);
+  letter-spacing: -0.012em;
+}
+
+.trust-item .link {
+  justify-self: start;
+}
+
+.trust-item .check {
+  margin-top: var(--s-2);
+}
+
+.ledger {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--t-small);
+  line-height: 1.5;
+}
+
+.ledger th,
+.ledger td {
+  padding: var(--s-2) var(--s-3) var(--s-2) 0;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.ledger th {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.ledger td:first-child {
+  white-space: nowrap;
+}
+
+.ledger .mono {
+  font-size: 0.8125rem;
+}
+
+.signals {
+  display: grid;
+  grid-template-columns: 11rem minmax(0, 1fr);
+  gap: var(--s-2) var(--s-4);
+  font-size: var(--t-small);
+  line-height: 1.5;
+}
+
+.signals dt {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.signals dd {
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 1023px) {
+  .trust-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-6);
+  }
+}
+
+@media (max-width: 559px) {
+  .signals {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-1) 0;
+  }
+
+  .signals dd {
+    margin-bottom: var(--s-2);
+  }
+}
+
+/* Plain page: one reading column, no scripts, prints on a sheet. */
+.plain {
+  max-width: 44rem;
+  padding-block: clamp(40px, 3vw + 28px, 72px) var(--padb);
+  display: grid;
+  gap: var(--s-6);
+}
+
+.plain__head {
+  display: grid;
+  gap: var(--s-2);
+}
+
+.plain h1 {
+  font-size: clamp(1.75rem, 1.2rem + 1.8vw, 2.5rem);
+}
+
+.plain section {
+  display: grid;
+  gap: var(--s-3);
+}
+
+.plain h2 {
+  padding-bottom: var(--s-2);
+  border-bottom: 1px solid var(--ink);
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.plain ul {
+  display: grid;
+  gap: var(--s-2);
+  padding-left: 1.1em;
+  list-style: disc;
+}
+
+.plain .rows > div {
+  display: grid;
+  gap: var(--s-1);
+}
+
+.plain__note {
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: var(--t-small);
+}
+
+.plain-header .wrap {
+  column-gap: var(--s-5);
+}
+
+.plain-header .meta {
+  margin-right: auto;
+}
+
+@media (max-width: 719px) {
+  .plain-header .wrap {
+    flex-wrap: wrap;
+    row-gap: var(--s-2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .evidence__chev {
+    transition: none;
+  }
+}
+
+@media print {
+  .index,
+  .rail,
+  .plain-header .btn,
+  .evidence-pill {
+    display: none !important;
+  }
+
+  .evidence {
+    display: block;
+  }
+
+  .evidence > summary {
+    border: 0;
+    padding: 0;
+  }
+
+  .plain {
+    max-width: none;
+  }
+}
+
+/* Seal parts (added with the build): the ring text, stroke weights, and the id line. */
+.seal__ring {
+  stroke-width: 1.5;
+}
+
+.seal__ring--inner {
+  stroke-width: 1;
+}
+
+.seal__tick {
+  stroke-width: 1.5;
+}
+
+.seal__dash {
+  stroke-width: 2;
+  color: var(--gold);
+}
+
+.seal__mark {
+  stroke-width: 1.75;
+}
+
+.seal__text {
+  fill: var(--gold-text);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.seal__id {
+  color: var(--gold-text);
+  font-size: 0.8125rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.cover__seal .seal__caption,
+.seal-grid .seal__caption {
+  margin-top: calc(-1 * var(--s-2));
+}
+
+/* The seal section on the trust page: the figure beside the list of what drew it. */
+.seal-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--s-5);
+  row-gap: var(--s-6);
+  align-items: start;
+}
+
+.seal-grid__figure {
+  grid-column: 1 / span 4;
+  display: grid;
+  justify-items: center;
+  gap: var(--s-4);
+  text-align: center;
+}
+
+.seal-grid__figure .seal {
+  width: min(100%, 220px);
+}
+
+.seal-grid__text {
+  grid-column: 6 / -1;
+  display: grid;
+  gap: var(--s-5);
+  min-width: 0;
+}
+
+.seal-grid__text .section__head {
+  margin-bottom: 0;
+}
+
+@media (max-width: 1023px) {
+  .seal-grid__figure {
+    grid-column: 1 / -1;
+    justify-items: start;
+    text-align: left;
+  }
+
+  .seal-grid__text {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Code on the trust page: a command the reader can run. */
+.trust-item pre {
+  margin: 0;
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  overflow-x: auto;
+}
+
+.trust-item code,
+.ledger code {
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+}
+
+/* The plain page header: the name, a tag, then the links. */
+.plain-header .wordmark {
+  margin-right: 0;
+}
+
+.plain-header .site-nav {
+  margin-left: auto;
+}
+
+/* The section label above a heading. */
+.section__head .exhibit-label {
+  margin-bottom: calc(-1 * var(--s-2));
+}

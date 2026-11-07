@@ -1,0 +1,421 @@
+/*
+  play.css: the play layer. The two buttons in the bottom left corner, the UV veil and the notes in
+  invisible ink (.ink), and the console. play.js builds the buttons, the veil and the console; the
+  ink notes are written in the pages and stay invisible until the UV light is on. The ink glows
+  blue white, the one color outside the palette, because that is what ink under a UV lamp does.
+*/
+
+/* The buttons */
+.play-tabs {
+  position: fixed;
+  left: var(--s-5);
+  bottom: var(--s-5);
+  z-index: 8800;
+  display: flex;
+  gap: var(--s-2);
+  transition: opacity 300ms var(--ease), transform 300ms var(--ease), visibility 0s;
+}
+
+.play-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px 0 12px;
+  border: 1px solid var(--wire);
+  border-radius: 22px;
+  background: var(--bg);
+  color: var(--ink);
+  font: 500 0.875rem/1 var(--font);
+  box-shadow: 0 12px 32px -14px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  transition: transform 250ms var(--ease-out), border-color 200ms var(--ease), background-color 200ms var(--ease),
+    color 200ms var(--ease), box-shadow 250ms var(--ease), var(--focus-t);
+}
+
+.play-tab__icon {
+  width: 18px;
+  height: 18px;
+}
+
+.play-tab__count {
+  margin-left: 2px;
+  padding: 2px 7px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--gold-text);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .play-tab:hover {
+    transform: translateY(-2px);
+    border-color: var(--gold);
+    box-shadow: 0 18px 36px -16px rgba(0, 0, 0, 0.5);
+  }
+}
+
+.play-tab:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.uv-tab[aria-pressed="true"],
+.console-tab[aria-expanded="true"] {
+  background: var(--ink);
+  color: var(--bg);
+  border-color: var(--ink);
+}
+
+html.js:not(.reduce) .play-tabs {
+  animation: tab-in 600ms var(--ease-out) 900ms backwards;
+}
+
+html.js.is-opening:not(.reduce) .play-tabs {
+  animation-delay: 2300ms;
+}
+
+/* The UV light */
+.uv-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 8700;
+  pointer-events: none;
+  opacity: 0;
+  /* A pool of violet light, not a clear torch: the page stays readable inside it and the ink glows. */
+  background: radial-gradient(circle at var(--ux, 50%) var(--uy, 50%), rgba(30, 12, 70, 0.72) 0, rgba(26, 10, 62, 0.76) 80px, rgba(12, 5, 26, 0.86) 120px, rgba(5, 3, 2, 0.94) 185px);
+  transition: opacity 400ms var(--ease);
+}
+
+html.uv .uv-veil {
+  opacity: 1;
+}
+
+html.uv {
+  --focus: #c9b6ff;
+}
+
+.ink {
+  position: absolute;
+  z-index: 8750;
+  max-width: 17rem;
+  opacity: 0 !important;
+  pointer-events: none;
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  color: #e6fbff;
+  text-shadow: 0 0 5px #8fe4ff, 0 0 14px rgba(120, 210, 255, 0.9), 0 0 30px rgba(120, 160, 255, 0.55);
+  transform: rotate(-2deg);
+  transition: opacity 120ms linear;
+}
+
+html.uv .ink {
+  opacity: var(--glow, 0) !important;
+}
+
+/* The layer above the veil that holds the glowing twins while the light is on */
+.uv-ink {
+  position: fixed;
+  inset: 0;
+  z-index: 8750;
+  pointer-events: none;
+}
+
+.ink--twin {
+  position: fixed;
+  max-width: none;
+  transition: none;
+}
+
+.has-ink {
+  position: relative;
+}
+
+/* Where each note sits. Notes anchored at the right of a .wrap use the gutter, so they end at the content edge
+   and never reach the viewport edge (a rotated note there made the page scroll sideways). */
+.ink--cover-flag {
+  left: calc(100% + 18px);
+  top: 50%;
+  margin-top: -1.3em;
+  white-space: nowrap;
+  transform: rotate(-1.5deg);
+}
+
+.ink--cover-seal {
+  left: 50%;
+  bottom: -2.4rem;
+  width: 16rem;
+  margin-left: -8rem;
+  text-align: center;
+}
+
+.ink--exhibits {
+  right: 8px;
+  top: 0.2rem;
+  text-align: right;
+}
+
+.ink--band {
+  right: var(--gut);
+  top: 0;
+  text-align: right;
+  transform: rotate(2deg);
+}
+
+.ink--rail {
+  left: 0;
+  top: calc(100% + 12px);
+}
+
+.ink--trust {
+  right: var(--gut);
+  bottom: -2.2rem;
+  text-align: right;
+}
+
+.ink--ai {
+  right: var(--gut);
+  top: 0;
+  text-align: right;
+  transform: rotate(1.5deg);
+}
+
+/* The console */
+.console {
+  position: fixed;
+  left: var(--s-5);
+  bottom: 84px;
+  z-index: 8600;
+  width: min(760px, calc(100% - var(--s-5) * 2));
+  max-height: min(52vh, 560px);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #5c4a3a;
+  border-radius: var(--r-md);
+  background: #15100d;
+  color: #e9dec9;
+  box-shadow: 0 30px 60px -24px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(194, 141, 57, 0.1);
+  font-family: var(--mono);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(16px) scale(0.98);
+  transform-origin: 10% 100%;
+  transition: opacity 220ms var(--ease), transform 320ms var(--ease-out), visibility 0s linear 320ms;
+}
+
+.console.is-open {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: opacity 220ms var(--ease), transform 320ms var(--ease-out), visibility 0s;
+}
+
+.console__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: 10px 12px 10px 16px;
+  border-bottom: 1px solid #3a2d24;
+  background: #1d1613;
+  border-radius: var(--r-md) var(--r-md) 0 0;
+}
+
+.console__name {
+  color: #c28d39;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+
+.console__sub {
+  flex: 1;
+  color: #8f7f6a;
+  font-size: 0.75rem;
+}
+
+.console__close {
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid #5c4a3a;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: #e9dec9;
+  font: 500 0.8125rem/1 var(--font);
+  cursor: pointer;
+  transition: border-color var(--m-out) var(--ease), background-color var(--m-out) var(--ease);
+}
+
+.console__close:hover {
+  border-color: #c28d39;
+  background: #2a2019;
+}
+
+.console__close:focus-visible {
+  outline: 2px solid #c28d39;
+  outline-offset: 2px;
+}
+
+.console__out {
+  flex: 1 1 auto;
+  min-height: 160px;
+  overflow: auto;
+  padding: 14px 16px 6px;
+  overscroll-behavior: contain;
+}
+
+.console__line {
+  margin: 0 0 2px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  animation: console-line 160ms var(--ease) both;
+}
+
+@keyframes console-line {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.console__line--in {
+  color: #c28d39;
+  margin-top: 8px;
+}
+
+.console__line--head {
+  color: #f3e9d6;
+  font-weight: 600;
+}
+
+.console__line--muted {
+  color: #a6957f;
+}
+
+.console__line--ok {
+  color: #e6c27a;
+}
+
+.console__line--err {
+  color: #e8a79a;
+}
+
+.console__line--cleared {
+  margin: 10px 0 6px;
+  padding: 10px 14px;
+  border: 1px solid #c28d39;
+  color: #f3e9d6;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.console__link {
+  color: #e6c27a;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.console__link:focus-visible {
+  outline: 2px solid #c28d39;
+  outline-offset: 2px;
+}
+
+.console__form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px 14px;
+  border-top: 1px solid #3a2d24;
+}
+
+.console__prompt {
+  color: #c28d39;
+  white-space: nowrap;
+}
+
+.console__in {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 0;
+  border: 0;
+  border-bottom: 1px solid #3a2d24;
+  background: transparent;
+  color: #f3e9d6;
+  font: inherit;
+  caret-color: #c28d39;
+  outline: none;
+}
+
+.console__in:focus {
+  border-bottom-color: #c28d39;
+}
+
+/* Small screens: the play buttons shrink to icons, the console fills the width */
+@media (max-width: 759px) {
+  .play-tab span:not(.play-tab__count) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .play-tab {
+    padding: 0 12px;
+  }
+
+  .console {
+    left: var(--s-3);
+    width: calc(100% - var(--s-3) * 2);
+    bottom: 76px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .console,
+  .console.is-open {
+    transition: opacity 120ms linear, visibility 0s;
+    transform: none;
+  }
+
+  .console__line {
+    animation: none;
+  }
+
+  .play-tab:hover {
+    transform: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .uv-veil {
+    display: none;
+  }
+
+  html.uv .ink {
+    opacity: 1 !important;
+    color: CanvasText;
+    text-shadow: none;
+  }
+}
+
+@media print {
+  .play-tabs,
+  .uv-veil,
+  .console,
+  .ink {
+    display: none;
+  }
+}

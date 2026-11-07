@@ -1,0 +1,8 @@
+# Security contact for this site (RFC 9116). It is a personal portfolio with no accounts, no forms,
+# and no data store. If you still find something wrong, I want to hear about it.
+Contact: mailto:wstewart.w06@gmail.com
+Expires: 2027-11-06T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://wwstewart.github.io/.well-known/security.txt
+Policy: https://wwstewart.github.io/trust.html#report
+# Flag 5 of 6: FLAG{security_txt}. Submit it in the console on the site.

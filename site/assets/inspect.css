@@ -1,0 +1,600 @@
+/*
+  inspect.css: Inspect mode. The header switch, the overlay of outlines with their name tags, the
+  scan line, and the inspector panel. The overlay and panel exist only while html.is-inspecting is
+  set; the switch stays hidden (the hidden attribute) until inspect.js shows it.
+*/
+
+/* Tokens: light first, dark repeated in both dark places, as in styles.css. */
+:root {
+  --insp-tint: color-mix(in srgb, var(--accent) 6%, transparent);
+  --insp-band-tint: color-mix(in srgb, var(--band-ink) 10%, transparent);
+  --insp-code-value: var(--gold-text);
+  --insp-shadow: 0 22px 48px -26px color-mix(in srgb, var(--ink) 45%, transparent);
+  --insp-shadow-up: 0 -16px 40px -28px color-mix(in srgb, var(--ink) 45%, transparent);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --insp-tint: color-mix(in srgb, var(--accent) 8%, transparent);
+    --insp-band-tint: color-mix(in srgb, var(--band-ink) 10%, transparent);
+    --insp-code-value: var(--ink);
+    --insp-shadow: 0 22px 48px -20px color-mix(in srgb, var(--bg) 90%, transparent);
+    --insp-shadow-up: 0 -16px 40px -20px color-mix(in srgb, var(--bg) 90%, transparent);
+  }
+}
+
+:root[data-theme="dark"] {
+  --insp-tint: color-mix(in srgb, var(--accent) 8%, transparent);
+  --insp-band-tint: color-mix(in srgb, var(--band-ink) 10%, transparent);
+  --insp-code-value: var(--ink);
+  --insp-shadow: 0 22px 48px -20px color-mix(in srgb, var(--bg) 90%, transparent);
+  --insp-shadow-up: 0 -16px 40px -20px color-mix(in srgb, var(--bg) 90%, transparent);
+}
+
+/* The switch: a quiet text button that reads as the last item of the nav. Its padding is
+   pulled back with negative margins, so the text keeps the nav's spacing and only the pressed
+   fill reaches into the gaps. The 4px under the label matches the room under the nav's words
+   (for their underline), so the label sits on their line. */
+.inspect-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: 44px;
+  margin-inline: calc(-1 * var(--s-3));
+  padding: 0 calc(var(--s-3) - 1px) 4px;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--muted);
+  font: 500 0.9375rem/1.2 var(--font);
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: color var(--m-out) var(--ease), background-color var(--m-out) var(--ease),
+    border-color var(--m-out) var(--ease), transform var(--m-out) var(--ease), var(--focus-t);
+}
+
+.inspect-toggle__icon {
+  color: var(--accent);
+}
+
+.inspect-toggle[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .inspect-toggle:hover {
+    background: var(--accent-soft);
+    color: var(--ink);
+    transition-duration: var(--m-in);
+  }
+
+  .inspect-toggle[aria-pressed="true"]:hover {
+    color: var(--accent);
+  }
+}
+
+.inspect-toggle:active {
+  transform: scale(0.98);
+  transition-duration: var(--m-press);
+}
+
+/* Until inspect.js shows the switch, its box already holds the place, invisible (so it can't be
+   pressed, focused, or read), and the header doesn't move when the script runs. Without
+   script the switch stays hidden and takes no room. */
+@media (scripting: enabled) {
+  .site-header .inspect-toggle[hidden] {
+    display: inline-flex !important;
+    visibility: hidden;
+  }
+}
+
+/* " this page" stays in the accessible name; it is only hidden from sight where room is short. */
+@media (max-width: 559px), (min-width: 1024px) and (max-width: 1079px) {
+  .inspect-toggle__more {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* Phones: the switch is an icon button that ends the links line, so the header keeps two rows.
+   Its name is still "Inspect this page". The margins keep the icon one nav gap from the last
+   word and let the button's edge reach into the side gutter. */
+@media (max-width: 479px) {
+  .site-header .wrap > .inspect-toggle {
+    margin-inline: calc(-1 * var(--s-3)) calc(-1 * var(--s-2));
+    padding-inline: calc(var(--s-2) - 1px);
+    gap: 0;
+  }
+
+  .inspect-toggle__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* Below 1024px one header row can't hold the name, the links, the switch, and the button
+   (with the Resume link it already crowds at 720 to 834px), so the header keeps its two row
+   form: the name and the button on top, then the links, with the switch after them. Where the
+   links and the switch still don't fit on one line (under 375px with the Resume link), the
+   switch takes a line of its own. */
+@media (max-width: 1023px) {
+  .site-header .wrap:has(> .inspect-toggle) {
+    flex-wrap: wrap;
+    row-gap: 0;
+    padding-block: var(--s-3) 0;
+  }
+
+  .site-header .wrap:has(> .inspect-toggle)::after {
+    content: "";
+    order: 2;
+    flex-basis: 100%;
+  }
+
+  .site-header .wrap:has(> .inspect-toggle) > .btn {
+    order: 2;
+  }
+
+  .site-header .wrap:has(> .inspect-toggle) > .site-nav {
+    order: 3;
+    width: auto;
+  }
+
+  .site-header .wrap > .inspect-toggle {
+    order: 3;
+  }
+}
+
+/* While inspecting, the page's own links and buttons select their part instead of acting, so
+   they stop looking like links. */
+.is-inspecting :is(.site-header, main, .site-footer) :is(a, button, summary, label) {
+  cursor: default;
+}
+
+.is-inspecting .site-header .inspect-toggle {
+  cursor: pointer;
+}
+
+/* Room under the footer while inspecting, so the last parts can scroll up clear of the panel. */
+.is-inspecting body::after {
+  content: "";
+  display: block;
+  height: calc(min(70vh, 560px) + var(--s-5));
+}
+
+@media (max-width: 719px) {
+  .is-inspecting body::after {
+    height: min(52vh, 460px);
+  }
+}
+
+/* The overlay: one layer in page coordinates, a box and a name tag per part. */
+.insp-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 30;
+  width: 100%;
+  overflow: clip;
+  pointer-events: none;
+}
+
+.insp-box {
+  position: absolute;
+  border: 1px dashed var(--accent);
+  transition: background-color var(--m-out) var(--ease), border-color var(--m-out) var(--ease);
+}
+
+.insp-box.is-hover {
+  border-style: solid;
+  background: var(--insp-tint);
+  transition-duration: var(--m-in);
+}
+
+.insp-box.is-selected {
+  border: 2px solid var(--accent);
+  background: transparent;
+}
+
+.insp-box--band {
+  border-color: var(--band-ink);
+}
+
+.insp-box--band.is-hover {
+  background: var(--insp-band-tint);
+}
+
+.insp-box--band.is-selected {
+  border-color: var(--band-ink);
+}
+
+/* Name tags sit on the box's edge like a tab: rounded away from the line they hang from. */
+.insp-tag {
+  position: absolute;
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-2);
+  padding: 2px var(--s-2) 3px;
+  border-radius: var(--r-sm) var(--r-sm) 0 0;
+  background: var(--accent);
+  color: var(--on-accent);
+  font: 500 0.8125rem/1.3 var(--font);
+  white-space: nowrap;
+}
+
+.insp-tag[data-place="inside"] {
+  border-radius: 0 0 var(--r-sm) 0;
+}
+
+.insp-tag[data-place="below"] {
+  border-radius: 0 0 var(--r-sm) var(--r-sm);
+}
+
+.insp-tag__size {
+  display: none;
+  color: var(--on-accent-muted);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
+.insp-tag.is-hover .insp-tag__size,
+.insp-tag.is-selected .insp-tag__size {
+  display: inline;
+}
+
+.insp-tag--band {
+  background: var(--band-ink);
+  color: var(--band);
+}
+
+.insp-tag--band .insp-tag__size {
+  color: var(--band);
+}
+
+/* The scan line: one pass down the viewport when the mode turns on, then removed. */
+.insp-scan {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 31;
+  width: 100%;
+  height: 1px;
+  background: var(--accent);
+  pointer-events: none;
+}
+
+/* The panel: a card at the bottom right, its right edge on the content edge. */
+.insp-panel {
+  position: fixed;
+  right: max(var(--gut), calc((100% - 1280px) / 2), env(safe-area-inset-right, 0px));
+  bottom: max(var(--s-5), env(safe-area-inset-bottom, 0px));
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  width: min(400px, calc(100% - 2 * var(--s-5)));
+  max-height: min(70vh, 560px);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--bg);
+  box-shadow: var(--insp-shadow);
+  color: var(--ink);
+  font-size: var(--t-small);
+  line-height: 1.5;
+}
+
+/* For a part in the right column the panel docks on the left edge instead, so it doesn't cover
+   the part (inspect.js sets the class). It changes sides at once; nothing travels. */
+@media (min-width: 720px) {
+  .insp-panel--start {
+    right: auto;
+    left: max(var(--gut), calc((100% - 1280px) / 2), env(safe-area-inset-left, 0px));
+  }
+}
+
+.insp-panel__bar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  padding: 0 var(--s-2) 0 var(--s-5);
+  border-bottom: 1px solid var(--line);
+}
+
+.insp-panel__count {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 479px) {
+  .insp-panel__more {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+.insp-panel__leave {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: 44px;
+  padding: 0 var(--s-3);
+  border: 0;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--muted);
+  font: 500 0.9375rem/1.2 var(--font);
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: color var(--m-out) var(--ease), background-color var(--m-out) var(--ease),
+    transform var(--m-out) var(--ease), var(--focus-t);
+}
+
+.insp-panel__leave:active {
+  transform: scale(0.98);
+  transition-duration: var(--m-press);
+}
+
+.insp-panel__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 20px var(--s-5);
+}
+
+.insp-panel__body:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+.insp-panel__title {
+  font-size: var(--t-h3);
+  line-height: 1.25;
+  letter-spacing: -0.012em;
+}
+
+.insp-panel__note {
+  margin-top: 6px;
+}
+
+.insp-label {
+  margin: var(--s-4) 0 6px;
+  color: var(--muted);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* Live facts: rows closed by 1px rules, like the rest of the site. */
+.insp-facts {
+  margin-top: var(--s-4);
+}
+
+.insp-facts > div {
+  display: grid;
+  grid-template-columns: 4.75rem minmax(0, 1fr);
+  column-gap: var(--s-3);
+  padding-block: 4px;
+  border-top: 1px solid var(--line);
+}
+
+.insp-facts > div:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+.insp-facts dt {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.insp-facts dd {
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.insp-contrast {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+}
+
+/* The swatch is painted with the part's real text and background colors. */
+.insp-swatch {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 2rem;
+  height: 1.375rem;
+  margin-top: 0.0625rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  font-size: 0.8125rem;
+  line-height: 1;
+}
+
+.insp-contrast__text {
+  display: grid;
+}
+
+.insp-contrast__low {
+  color: var(--muted);
+}
+
+/* The start tag, as code. */
+.insp-code {
+  margin: 0;
+  padding: 10px var(--s-3);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--ink);
+  font: 400 var(--t-small) / 1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  tab-size: 2;
+}
+
+.insp-code code {
+  font: inherit;
+}
+
+.insp-line {
+  display: block;
+}
+
+/* The indent is two real spaces, so copied code keeps it; wrapped lines hang under it. */
+.insp-line--attr {
+  padding-left: 2ch;
+  text-indent: -2ch;
+}
+
+.insp-tok--p,
+.insp-tok--a {
+  color: var(--muted);
+}
+
+.insp-tok--t {
+  color: var(--accent);
+}
+
+.insp-tok--v {
+  color: var(--insp-code-value);
+}
+
+.insp-panel__steps {
+  display: grid;
+  flex: none;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-5);
+  border-top: 1px solid var(--line);
+}
+
+.insp-step {
+  min-height: 44px;
+  padding: var(--s-2) var(--s-3);
+  font-size: 0.9375rem;
+}
+
+.insp-arrow {
+  transition: transform var(--m-out) var(--ease);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .insp-panel__leave:hover {
+    background: var(--accent-soft);
+    color: var(--ink);
+    transition-duration: var(--m-in);
+  }
+
+  .insp-step--prev:hover .insp-arrow {
+    transform: translateX(-3px);
+  }
+
+  .insp-step--next:hover .insp-arrow {
+    transform: translateX(3px);
+  }
+}
+
+/* Phones: a bottom sheet across the width, short enough to keep the selected part in view. */
+@media (max-width: 719px) {
+  .insp-panel {
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: auto;
+    max-height: min(52vh, 460px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    border-width: 1px 0 0;
+    border-radius: var(--r-md) var(--r-md) 0 0;
+    box-shadow: var(--insp-shadow-up);
+  }
+
+  .insp-panel__bar,
+  .insp-panel__body,
+  .insp-panel__steps {
+    padding-left: max(var(--gut), env(safe-area-inset-left, 0px));
+    padding-right: max(var(--gut), env(safe-area-inset-right, 0px));
+  }
+
+  .insp-panel__bar {
+    padding-block: 0;
+    padding-right: max(calc(var(--gut) - var(--s-3)), env(safe-area-inset-right, 0px));
+  }
+
+  .insp-panel__body {
+    padding-block: var(--s-4);
+  }
+
+  .insp-panel__title {
+    font-size: var(--t-lead);
+  }
+
+  .insp-panel__steps {
+    padding-block: var(--s-3);
+  }
+}
+
+/* Under reduced motion nothing here travels, and states change at once. */
+@media (prefers-reduced-motion: reduce) {
+  .inspect-toggle,
+  .insp-box,
+  .insp-panel__leave,
+  .insp-step,
+  .insp-arrow {
+    transition: none !important;
+  }
+
+  .inspect-toggle:active,
+  .insp-panel__leave:active,
+  .insp-arrow {
+    transform: none !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .insp-box,
+  .insp-box--band,
+  .insp-box.is-selected {
+    border-color: Highlight;
+  }
+
+  .insp-tag,
+  .insp-tag--band {
+    border: 1px solid Highlight;
+  }
+
+  .insp-scan {
+    background: Highlight;
+  }
+
+  .inspect-toggle[aria-pressed="true"] {
+    border-color: Highlight;
+  }
+}
+
+@media print {
+  .inspect-toggle,
+  .insp-layer,
+  .insp-scan,
+  .insp-panel {
+    display: none !important;
+  }
+}

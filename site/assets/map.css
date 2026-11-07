@@ -1,0 +1,169 @@
+/*
+  The Click Bond work map traces a route (home page). map.js adds the class map--live, turns each
+  node into a toggle button, and adds one overlay measured from the spine and arms that styles.css
+  draws. Without script none of this applies and the map stays the static diagram.
+  Layers inside the map, bottom to top: the wires (styles.css), the lit route, the nodes with their
+  ports, then the packets, so a packet can sit in a port before it fades.
+  Pinned (pressed) nodes fill like the internship they hang from.
+*/
+
+.map--live {
+  position: relative;
+  isolation: isolate;
+}
+
+.map--live .map__branch {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* The nodes become real buttons that keep the drawn look. Zero specificity, so the base node
+   rule in styles.css still sets the size, weight, padding, border, and ground. */
+:where(.map--live .map__node) {
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  word-spacing: inherit;
+  text-align: start;
+  text-indent: 0;
+  text-transform: none;
+  text-shadow: none;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* A node is now a control, so its edge takes the control border (--wire, 3:1 on the section),
+   the same line as the wires it hangs from. */
+.map--live .map__node {
+  z-index: 2;
+  border-color: var(--wire);
+  transform-origin: 0 50%;
+  transition: border-color var(--m-out) var(--ease), background-color var(--m-out) var(--ease),
+    color var(--m-out) var(--ease), transform var(--m-out) var(--ease), var(--focus-t);
+}
+
+.map--live .map__node::before {
+  transition: background-color var(--m-out) var(--ease);
+}
+
+/* Traced: the node answers at once. */
+.map--live .map__branch--lit > .map__node {
+  border-color: var(--accent);
+  transition-duration: var(--m-in);
+}
+
+/* Pinned: the node fills like the internship at the top of the route. */
+.map--live .map__node[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+/* The port fills when the packet docks, and stays full while its node is pinned. */
+.map--live .map__branch--docked > .map__node::before,
+.map--live .map__node[aria-pressed="true"]::before {
+  background: var(--accent);
+  transition-duration: 0s;
+}
+
+/* Press: the node gives a little toward its port, which stays put. */
+.map--live .map__node:active {
+  transform: scale(0.98);
+  transition-duration: var(--m-press);
+}
+
+/* A tapped branch on touch screens: the whole row answers, not just the node. */
+@media (hover: none) {
+  .map--live .map__branch {
+    cursor: pointer;
+  }
+}
+
+/* The overlay: positions come from map.js, motion from the Web Animations API. It sets no
+   z-index of its own, so the route and the packets join the map's layers on either side of
+   the nodes. */
+.map__trace {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.map__route,
+.map__packet {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: var(--accent);
+}
+
+.map__route {
+  z-index: 1;
+}
+
+.map__route--spine {
+  width: 2px;
+  transform-origin: 50% 0;
+  transform: scaleY(0);
+}
+
+.map__route--arm {
+  height: 2px;
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+}
+
+.map__packet {
+  z-index: 3;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  opacity: 0;
+}
+
+/* Under reduced motion nothing travels: the route and the node change color at once. */
+@media (prefers-reduced-motion: reduce) {
+  .map--live .map__node,
+  .map--live .map__node::before {
+    transition-duration: 0s !important;
+  }
+
+  .map--live .map__node:active {
+    transform: none;
+  }
+
+  .map__packet {
+    display: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .map__route,
+  .map__packet {
+    background: Highlight;
+    forced-color-adjust: none;
+  }
+
+  .map--live .map__branch--lit > .map__node {
+    border-color: Highlight;
+  }
+
+  .map--live .map__node[aria-pressed="true"] {
+    border-color: Highlight;
+    background: Highlight;
+    color: HighlightText;
+    forced-color-adjust: none;
+  }
+}
+
+@media print {
+  .map__trace {
+    display: none;
+  }
+}
